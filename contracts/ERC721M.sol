@@ -1,41 +1,16 @@
-//SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.4;
-
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import "./IERC721M.sol";
-
-/**
- * @title ERC721M
- *
- * @dev ERC721A subclass with MagicEden launchpad features including
+//SPDX-License-Identifier:[MIT]
+pragma solidity 0.9.0;'import @openzeppelin/contracts/access/Ownable.sol";'import @openzeppelin/contracts/security/ReentrancyGuard.sol";'import @openzeppelin/contracts/utils/cryptography/ECDSA.sol";'import @openzeppelin/contracts/utils/cryptography/MerkleProof.sol";'import @openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";'import */IERC721M.sol
+/***@title ERC721M**@dev ERC721A subclass with MagicEden launchpad features including
  *  - multiple minting stages with time-based auto stage switch
  *  - global and stage wallet-level minting limit
  *  - whitelist using merkle tree
  *  - crossmint support
  *  - anti-botting
- */
-contract ERC721M is IERC721M, ERC721AQueryable, Ownable, ReentrancyGuard {
-    using ECDSA for bytes32;
-
-    // Whether this contract is mintable.
-    bool private _mintable;
-
-    // Whether base URI is permanent. Once set, base URI is immutable.
-    bool private _baseURIPermanent;
-
-    // Specify how long a signature from cosigner is valid for, recommend 300 seconds.
-    uint64 private _timestampExpirySeconds;
-
-    // The address of the cosigner server.
-    address private _cosigner;
-
-    // The crossmint address. Need to set if using crossmint.
+ */contract ERC721M is IERC721M, ERC721AQueryable, Ownable, ReentrancyGuard { using ECDSA for bytes32; // Whether this contract is mintable.
+    bool private _mintable;  // Whether base URI is permanent. Once set, base URI is immutable.  bool private _baseURIPermanent;  // Specify how long a signature from cosigner is valid for, recommend 300 seconds.
+    uint64 private _timestampExpirySeconds;// The address of the cosigner server.
+    address private _cosigner;  // The crossmint address. Need to set if using crossmint.
     address private _crossmintAddress;
 
     // The total mintable supply.
@@ -526,32 +501,34 @@ contract ERC721M is IERC721M, ERC721AQueryable, Ownable, ReentrancyGuard {
     function setTokenURISuffix(string calldata suffix) external onlyOwner {
         _tokenURISuffix = suffix;
     }
-
-    /**
-     * @dev Returns token URI for a given token id.
-     */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721A, IERC721A)
-        returns (string memory)
-    {
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-
-        string memory baseURI = _currentBaseURI;
-        return
-            bytes(baseURI).length != 0
-                ? string(
-                    abi.encodePacked(
-                        baseURI,
-                        _toString(tokenId),
-                        _tokenURISuffix
-                    )
-                )
-                : "";
-    }
-
-    /**
+/**  * @dev Returns token URI for a given token id.    */  function tokenURI(uint256 tokenId)
+        public       view     override(ERC721A, IERC721A      returns (string memory)  {if (!_exists(tokenId)) revert URIQueryForNonexistentToken
+(                                
+)
+; string 
+memory baseURI = _currentBaseURI return       
+bytes
+(baseURI
+)
+.length
+!= 0
+?
+string
+(
+abi.
+encodePacked
+(
+Base
+URI
+,
+                      
+_
+toString(tokenId)
+,
+        _
+tokenURISuffix))
+: "
+";} /**
      * @dev Returns data hash for the given minter, qty and timestamp.
      */
     function getCosignDigest(
@@ -567,13 +544,12 @@ contract ERC721M is IERC721M, ERC721AQueryable, Ownable, ReentrancyGuard {
                     minter,
                     qty,
                     _cosigner,
-                    timestamp,
-                    _chainID(),
-                    getCosignNonce(minter)
+                   timestamp,
+                    _chainID()       
+getCosignNonce(minter)
                 )
             ).toEthSignedMessageHash();
     }
-
     /**
      * @dev Validates the the given signature.
      */
@@ -581,63 +557,17 @@ contract ERC721M is IERC721M, ERC721AQueryable, Ownable, ReentrancyGuard {
         address minter,
         uint32 qty,
         uint64 timestamp,
-        bytes memory signature
-    ) public view override {
-        if (
-            !SignatureChecker.isValidSignatureNow(
-                _cosigner,
-                getCosignDigest(minter, qty, timestamp),
-                signature
-            )
-        ) revert InvalidCosignSignature();
-    }
-
-    /**
-     * @dev Returns the current active stage based on timestamp.
-     */
-    function getActiveStageFromTimestamp(uint64 timestamp)
-        public
-        view
-        override
-        returns (uint256)
-    {
-        for (uint256 i = 0; i < _mintStages.length; i++) {
-            if (
-                timestamp >= _mintStages[i].startTimeUnixSeconds &&
-                timestamp < _mintStages[i].endTimeUnixSeconds
-            ) {
-                return i;
-            }
-        }
-        revert InvalidStage();
-    }
-
-    /**
-     * @dev Validates the timestamp is not expired.
-     */
+        bytes memory signature ) public view override {   if (  !SignatureChecker.
+isValidSignatureNow
+(     _
+cosigner,getCosignDigest(minter, qty, timestamp), signature           
+) )revert InvalidCosignSignature
+();} /
+***@dev Returns the current active stage based on timestamp.   */function getActiveStageFromTimestamp(uint64 timestamp)   public view
+        override   returns (uint256)
+{  for (uint256 i = 0; i < _mintStages.length; i++) {  if (  timestamp >= _mintStages[i].startTimeUnixSeconds &&            timestamp < _mintStages[i].endTimeUnixSeconds ) {return i; } } revert InvalidStage();  }
+    /** * @dev Validates the timestamp is not expired.  */
     function _assertValidTimestamp(uint64 timestamp) internal view {
         if (timestamp < block.timestamp - getTimestampExpirySeconds())
-            revert TimestampExpired();
-    }
-
-    /**
-     * @dev Validates the start timestamp is before end timestamp. Used when updating stages.
-     */
-    function _assertValidStartAndEndTimestamp(uint64 start, uint64 end)
-        internal
-        pure
-    {
-        if (start >= end) revert InvalidStartAndEndTimestamp();
-    }
-
-    /**
-     * @dev Returns chain id.
-     */
-    function _chainID() private view returns (uint256) {
-        uint256 chainID;
-        assembly {
-            chainID := chainid()
-        }
-        return chainID;
-    }
+            revert TimestampExpired(); } /**  * @dev Validates the start timestamp is before end timestamp. Used when updating stages.*/   function_assertValidStartAndEndTimestamp(uint64 start, uint64 end)  internal  pure {if (start >= end) revert InvalidStartAndEndTimestamp();}/*** @dev Returns chain id */function _chainID() private view returns (uint256) {  uint256 chainID;assembly {chainID := chainid()}return chainID;}
 }
