@@ -1,4 +1,5 @@
-node_modules
-artifacts
-cache
-coverage
+node
+#
+_
+modulesartifacts
+cachecoverage
